@@ -1,4 +1,4 @@
-package com.alexxxshib.loudmetronome.presentation
+package com.mobiray.loudmetronome.presentation
 
 import android.Manifest
 import android.content.pm.PackageManager

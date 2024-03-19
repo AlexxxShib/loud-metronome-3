@@ -1,4 +1,4 @@
-package com.alexxxshib.loudmetronome
+package com.mobiray.loudmetronome.service
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -8,7 +8,8 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import androidx.core.app.NotificationCompat
-import com.alexxxshib.loudmetronome.presentation.MainActivity
+import com.mobiray.loudmetronome.R
+import com.mobiray.loudmetronome.presentation.MainActivity
 
 internal object NotificationsHelper {
 

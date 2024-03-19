@@ -30,7 +30,7 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".MetronomeService"
+        <service android:name=".service.MetronomeService"
             android:exported="false"
             android:foregroundServiceType="mediaPlayback"/>
 

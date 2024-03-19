@@ -1,4 +1,4 @@
-package com.alexxxshib.loudmetronome.presentation
+package com.mobiray.loudmetronome.presentation
 
 import android.app.Application
 import android.content.ComponentName
@@ -10,9 +10,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
-import com.alexxxshib.loudmetronome.MetronomeService
+import com.mobiray.loudmetronome.service.MetronomeService
 
-class MainViewModel(private val application: Application): AndroidViewModel(application) {
+class MetronomeViewModel(private val application: Application): AndroidViewModel(application) {
 
     private var metronomeService: MetronomeService? = null
     private var serviceBoundState by mutableStateOf(false)

@@ -1,4 +1,4 @@
-package com.alexxxshib.loudmetronome
+package com.mobiray.loudmetronome.service
 
 import android.app.Service
 import android.content.Intent

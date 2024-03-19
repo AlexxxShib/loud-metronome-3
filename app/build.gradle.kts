@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.alexxxshib.loudmetronome"
+    namespace = "com.mobiray.loudmetronome"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.alexxxshib.loudmetronome"
+        applicationId = "com.mobiray.loudmetronome"
         minSdk = 26
         targetSdk = 34
         versionCode = 1
@@ -52,7 +52,10 @@ android {
 dependencies {
 
     implementation(libs.androidx.core.ktx)
+
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
@@ -60,15 +63,6 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
 
-    testImplementation(libs.junit)
-
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.ui.test.junit4)
-
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
 }

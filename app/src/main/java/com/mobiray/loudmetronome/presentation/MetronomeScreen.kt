@@ -1,4 +1,4 @@
-package com.alexxxshib.loudmetronome.presentation
+package com.mobiray.loudmetronome.presentation
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -13,11 +13,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.alexxxshib.loudmetronome.ui.theme.LoudMetronome3Theme
+import com.mobiray.loudmetronome.ui.theme.LoudMetronome3Theme
 
 @Composable
 fun MetronomeScreen() {
-    val viewModel: MainViewModel = viewModel()
+    val viewModel: MetronomeViewModel = viewModel()
 
     LoudMetronome3Theme {
         MetronomeScreenContent(viewModel)
@@ -25,7 +25,7 @@ fun MetronomeScreen() {
 }
 
 @Composable
-private fun MetronomeScreenContent(mainViewModel: MainViewModel?) {
+private fun MetronomeScreenContent(viewModel: MetronomeViewModel?) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -36,7 +36,7 @@ private fun MetronomeScreenContent(mainViewModel: MainViewModel?) {
         Button(
             modifier = Modifier
                 .fillMaxWidth(),
-            onClick = { mainViewModel?.play() }
+            onClick = { viewModel?.play() }
         ) {
             Text(text = "Start service")
         }
@@ -44,7 +44,7 @@ private fun MetronomeScreenContent(mainViewModel: MainViewModel?) {
         Button(
             modifier = Modifier
                 .fillMaxWidth(),
-            onClick = { mainViewModel?.stop() }
+            onClick = { viewModel?.stop() }
         ) {
             Text(text = "Stop service")
         }

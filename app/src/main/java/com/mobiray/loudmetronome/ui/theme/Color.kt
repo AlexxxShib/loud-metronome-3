@@ -1,4 +1,4 @@
-package com.alexxxshib.loudmetronome.ui.theme
+package com.mobiray.loudmetronome.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
