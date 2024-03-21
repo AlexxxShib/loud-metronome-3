@@ -10,6 +10,11 @@ import android.util.Log
 import androidx.core.app.ServiceCompat
 import com.mobiray.loudmetronome.soundengine.SoundEngine
 import com.mobiray.loudmetronome.soundengine.preset.Segment
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.launch
 
 class MetronomeService : Service() {
 
@@ -19,18 +24,22 @@ class MetronomeService : Service() {
         fun getService(): MetronomeService = this@MetronomeService
     }
 
-    private val soundEngine by lazy {
-        SoundEngine(this, object : SoundEngine.Callback {
-            override fun onModelChangeCallback(isPlaying: Boolean, segment: Segment) {
-                Log.d(TAG, "model changed")
-            }
+    private val coroutineScope = CoroutineScope(Dispatchers.Default)
 
-        }, 0)
-    }
+    private lateinit var soundEngine: SoundEngine
+    private lateinit var collectEngineStageJob: Job
 
     override fun onCreate() {
         Log.d(TAG, "onCreate")
         super.onCreate()
+
+        soundEngine = SoundEngine(this, 0)
+
+        collectEngineStageJob = coroutineScope.launch {
+            soundEngine.getStateFlow().collect {
+                Log.d(TAG, "sound engine state: $it")
+            }
+        }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -53,6 +62,8 @@ class MetronomeService : Service() {
         super.onDestroy()
 
         soundEngine.startStopPlayback(false)
+
+        collectEngineStageJob.cancel()
     }
 
     private fun startAsForegroundService() {

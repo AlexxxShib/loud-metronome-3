@@ -1,8 +1,11 @@
 package com.mobiray.loudmetronome.soundengine
 
 import com.mobiray.loudmetronome.soundengine.preset.Preset
+import kotlinx.coroutines.flow.StateFlow
 
 interface ISoundEngine {
+
+    fun getStateFlow(): StateFlow<State>
 
     fun loadPreset(preset: Preset)
 

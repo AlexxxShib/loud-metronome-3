@@ -9,15 +9,19 @@ import com.mobiray.loudmetronome.soundengine.preset.Preset
 import com.mobiray.loudmetronome.soundengine.preset.Segment
 import com.mobiray.loudmetronome.soundengine.sample.Sample
 import com.mobiray.loudmetronome.soundengine.sample.SampleLoader
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import java.util.Arrays
 import kotlin.concurrent.thread
 
 
 class SoundEngine(
     private val context: Context,
-    private val callback: Callback,
     samplePackIndex: Int
 ) : ISoundEngine {
+
+    private val stateFlow: MutableStateFlow<State>
 
     private var playbackThread: Thread? = null
 
@@ -39,10 +43,13 @@ class SoundEngine(
     init {
         Log.d(TAG, "SoundEngine created")
 
-        currentPreset = Preset(Segment()) // 120, 4/4 - defaults
+        val preset = Preset(Segment()) // 120, 4/4 - defaults
+        currentPreset = preset
 
         val sample = SampleLoader.getSampleList(context)[samplePackIndex]
         setSamplePack(sample)
+
+        stateFlow = MutableStateFlow(State(isPlaying, preset.getSegment()))
 
         modelChangeCallback()
     }
@@ -175,8 +182,11 @@ class SoundEngine(
     private fun modelChangeCallback(segmentId: Int = 0) {
         val currentSegment = currentPreset?.getSegment(segmentId)?.copy()
             ?: throw NullPointerException("Current segment $segmentId is NULL")
-        callback.onModelChangeCallback(isPlaying, currentSegment)
+
+        stateFlow.value = State(isPlaying, currentSegment)
     }
+
+    override fun getStateFlow() = stateFlow
 
     override fun loadPreset(preset: Preset) {
         currentPreset = preset
@@ -228,11 +238,6 @@ class SoundEngine(
         private const val TAG = "SoundEngine_TAG"
 
         private const val TAG_THREAD = "SoundEngine_PlaybackThread_TAG"
-    }
-
-    interface Callback {
-
-        fun onModelChangeCallback(isPlaying: Boolean, segment: Segment)
     }
 }
 
