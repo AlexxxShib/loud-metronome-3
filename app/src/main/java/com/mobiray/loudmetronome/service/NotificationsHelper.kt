@@ -16,7 +16,8 @@ internal object NotificationsHelper {
     private const val NOTIFICATION_CHANNEL_ID = "general_notification_channel"
 
     fun createNotificationChannel(context: Context) {
-        val notificationManager = context.getSystemService(Service.NOTIFICATION_SERVICE) as NotificationManager
+        val notificationManager =
+            context.getSystemService(Service.NOTIFICATION_SERVICE) as NotificationManager
 
         val channel = NotificationChannel(
             NOTIFICATION_CHANNEL_ID,
@@ -27,14 +28,24 @@ internal object NotificationsHelper {
     }
 
     fun buildNotification(context: Context): Notification {
-        return NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID)
+        val notification = NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID)
             .setContentTitle(context.getString(R.string.metronome_service_notification_title))
             .setContentText(context.getString(R.string.metronome_service_notification_description))
             .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setSilent(true)
+            .setOngoing(true)
             .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
-            .setContentIntent(Intent(context, MainActivity::class.java).let { notificationIntent ->
-                PendingIntent.getActivity(context, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE)
-            })
+            .setContentIntent(PendingIntent.getActivity(
+                context,
+                0,
+                Intent(context, MainActivity::class.java).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                },
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT))
             .build()
+
+        notification.flags = notification.flags or Notification.FLAG_NO_CLEAR
+
+        return notification
     }
 }
