@@ -5,4 +5,24 @@
     <string name="metronome_service_notification_title">Metronome</string>
     <string name="metronome_service_notification_description">Metronome is running in the background.</string>
 
+    <string-array name="samples_labels">
+        <item>Loud cowbell</item>
+        <item>Metro</item>
+        <item>Tone</item>
+        <item>Digital</item>
+        <item>Kubase</item>
+        <item>Logical</item>
+        <item>Pr. Tools</item>
+    </string-array>
+
+    <string-array name="samples_prefixes">
+        <item>click</item>
+        <item>metro</item>
+        <item>ff</item>
+        <item>seiko</item>
+        <item>cubase</item>
+        <item>logic</item>
+        <item>protools</item>
+    </string-array>
+
 </resources>

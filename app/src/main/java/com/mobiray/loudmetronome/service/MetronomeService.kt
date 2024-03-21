@@ -8,6 +8,8 @@ import android.os.Build
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.ServiceCompat
+import com.mobiray.loudmetronome.soundengine.SoundEngine
+import com.mobiray.loudmetronome.soundengine.preset.Segment
 
 class MetronomeService : Service() {
 
@@ -15,6 +17,15 @@ class MetronomeService : Service() {
 
     inner class LocalBinder : Binder() {
         fun getService(): MetronomeService = this@MetronomeService
+    }
+
+    private val soundEngine by lazy {
+        SoundEngine(this, object : SoundEngine.Callback {
+            override fun onModelChangeCallback(isPlaying: Boolean, segment: Segment) {
+                Log.d(TAG, "model changed")
+            }
+
+        }, 0)
     }
 
     override fun onCreate() {
@@ -27,10 +38,12 @@ class MetronomeService : Service() {
 
         startAsForegroundService()
 
+        soundEngine.startStopPlayback(true)
+
         return super.onStartCommand(intent, flags, startId)
     }
 
-    override fun onBind(intent: Intent?): IBinder? {
+    override fun onBind(intent: Intent?): IBinder {
         Log.d(TAG, "onBind")
         return binder
     }
@@ -38,6 +51,8 @@ class MetronomeService : Service() {
     override fun onDestroy() {
         Log.d(TAG, "onDestroy")
         super.onDestroy()
+
+        soundEngine.startStopPlayback(false)
     }
 
     private fun startAsForegroundService() {
