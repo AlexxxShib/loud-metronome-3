@@ -4,13 +4,12 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.content.ContextCompat
-import com.mobiray.loudmetronome.soundengine.sample.SampleLoader
+import androidx.lifecycle.ViewModelProvider
 
 class MainActivity : ComponentActivity() {
 
@@ -20,6 +19,10 @@ class MainActivity : ComponentActivity() {
         registerForActivityResult(ActivityResultContracts.RequestPermission()) {
             checkAndRequestNotificationPermission()
         }
+
+    private val mainViewModel by lazy {
+        ViewModelProvider(this)[MainViewModel::class.java]
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,6 +35,18 @@ class MainActivity : ComponentActivity() {
         }
 
         checkAndRequestNotificationPermission()
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        mainViewModel.tryStartMetronomeService()
+    }
+
+    override fun onStop() {
+        super.onStop()
+
+        mainViewModel.tryStopMetronomeService()
     }
 
     private fun checkAndRequestNotificationPermission() {

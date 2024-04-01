@@ -10,9 +10,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
 import com.mobiray.loudmetronome.service.MetronomeService
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 
-class MetronomeViewModel(private val application: Application): AndroidViewModel(application) {
+class MainViewModel(private val application: Application) : AndroidViewModel(application) {
 
     private var metronomeService: MetronomeService? = null
     private var serviceBoundState by mutableStateOf(false)
@@ -26,7 +32,7 @@ class MetronomeViewModel(private val application: Application): AndroidViewModel
             metronomeService = binder.getService()
             serviceBoundState = true
 
-//            onServiceConnected()
+            onServiceConnected()
         }
 
         override fun onServiceDisconnected(arg0: ComponentName) {
@@ -34,19 +40,45 @@ class MetronomeViewModel(private val application: Application): AndroidViewModel
 
             serviceBoundState = false
             metronomeService = null
+
+            onServiceDisconnected()
         }
     }
 
-    init {
-        tryToBindToServiceIfRunning()
-    }
+    private var collectSoundEngineStateJob: Job? = null
 
-    fun play() {
+    private val _screenStateFlow = MutableStateFlow<ScreenState>(ScreenState.Loading)
+    val screenStateFlow: StateFlow<ScreenState>
+        get() = _screenStateFlow
+
+    private val isPlaying
+        get() = (_screenStateFlow.value as? ScreenState.Metronome)?.isPlaying ?: false
+
+    fun tryStartMetronomeService() {
         startForegroundService()
     }
 
-    fun stop() {
-        metronomeService?.stopForegroundService()
+    fun tryStopMetronomeService() {
+        if (!isPlaying)
+        {
+            metronomeService?.stopForegroundService()
+        }
+    }
+
+    fun playStop() {
+        metronomeService?.startStopPlayback(!isPlaying)
+    }
+
+    private fun onServiceConnected() {
+        collectSoundEngineStateJob = viewModelScope.launch {
+            metronomeService?.getStateFlow()?.collect {
+                _screenStateFlow.emit(ScreenState.Metronome(it.isPlaying, it.segment))
+            }
+        }
+    }
+
+    private fun onServiceDisconnected() {
+        collectSoundEngineStateJob?.cancel()
     }
 
     private fun startForegroundService() {

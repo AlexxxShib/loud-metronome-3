@@ -39,9 +39,10 @@ private val LightColorScheme = lightColorScheme(
 
 @Composable
 fun LoudMetronome3Theme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+//    darkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: Boolean = false,
     // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {

@@ -9,14 +9,16 @@ import android.os.IBinder
 import android.util.Log
 import androidx.core.app.ServiceCompat
 import com.mobiray.loudmetronome.soundengine.SoundEngine
-import com.mobiray.loudmetronome.soundengine.preset.Segment
+import com.mobiray.loudmetronome.soundengine.SoundEngineImpl
+import com.mobiray.loudmetronome.soundengine.SoundEngineState
+import com.mobiray.loudmetronome.soundengine.preset.Preset
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class MetronomeService : Service() {
+class MetronomeService : Service(), SoundEngine {
 
     private val binder = LocalBinder()
 
@@ -27,15 +29,14 @@ class MetronomeService : Service() {
     private val coroutineScope = CoroutineScope(Dispatchers.Default)
 
     private lateinit var soundEngine: SoundEngine
-    private lateinit var collectEngineStageJob: Job
 
     override fun onCreate() {
         Log.d(TAG, "onCreate")
         super.onCreate()
 
-        soundEngine = SoundEngine(this, 0)
+        soundEngine = SoundEngineImpl(this, 0)
 
-        collectEngineStageJob = coroutineScope.launch {
+        coroutineScope.launch {
             soundEngine.getStateFlow().collect {
                 Log.d(TAG, "sound engine state: $it")
             }
@@ -46,8 +47,6 @@ class MetronomeService : Service() {
         Log.d(TAG, "onStartCommand")
 
         startAsForegroundService()
-
-        soundEngine.startStopPlayback(true)
 
         return super.onStartCommand(intent, flags, startId)
     }
@@ -63,7 +62,7 @@ class MetronomeService : Service() {
 
         soundEngine.startStopPlayback(false)
 
-        collectEngineStageJob.cancel()
+        coroutineScope.cancel()
     }
 
     private fun startAsForegroundService() {
@@ -85,6 +84,42 @@ class MetronomeService : Service() {
 
     fun stopForegroundService() {
         stopSelf()
+    }
+
+    override fun getStateFlow(): StateFlow<SoundEngineState> {
+        return soundEngine.getStateFlow()
+    }
+
+    override fun loadPreset(preset: Preset) {
+        TODO("Not yet implemented")
+    }
+
+    override fun startStopPlayback(isPlay: Boolean) {
+        soundEngine.startStopPlayback(isPlay)
+    }
+
+    override fun addBpm(addBpmValue: Int) {
+        TODO("Not yet implemented")
+    }
+
+    override fun changeNumerator(numerator: Int) {
+        TODO("Not yet implemented")
+    }
+
+    override fun changeDenominator(denominator: Int) {
+        TODO("Not yet implemented")
+    }
+
+    override fun changeSubbeat(subbeat: Int) {
+        TODO("Not yet implemented")
+    }
+
+    override fun changeAccent(accent: Boolean) {
+        TODO("Not yet implemented")
+    }
+
+    override fun changeBpm(bpm: Int) {
+        TODO("Not yet implemented")
     }
 
     companion object {
