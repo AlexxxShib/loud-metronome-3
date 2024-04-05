@@ -13,7 +13,6 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.mobiray.loudmetronome.service.MetronomeService
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -68,8 +67,25 @@ class MainViewModel(private val application: Application) : AndroidViewModel(app
         metronomeService?.startStopPlayback(!isPlaying)
     }
 
-    fun changeBpm(changeValue: Int) {
+    fun addBpm(changeValue: Int) {
         metronomeService?.addBpm(changeValue)
+    }
+
+    fun changeNumerator(numerator: Int) {
+        metronomeService?.changeNumerator(numerator)
+    }
+
+    fun changeDenominator(denominator: Int) {
+        metronomeService?.changeDenominator(denominator)
+    }
+
+    fun changeAccent() {
+        val currentAccent = (_screenStateFlow.value as? ScreenState.Metronome)?.accent ?: false
+        metronomeService?.changeAccent(!currentAccent)
+    }
+
+    fun changeSubbeat(subbeatIndex: Int) {
+        metronomeService?.changeSubbeat(subbeatIndex)
     }
 
     private fun onServiceConnected() {

@@ -103,23 +103,23 @@ class MetronomeService : Service(), SoundEngine {
     }
 
     override fun changeNumerator(numerator: Int) {
-        TODO("Not yet implemented")
+        soundEngine.changeNumerator(numerator)
     }
 
     override fun changeDenominator(denominator: Int) {
-        TODO("Not yet implemented")
+        soundEngine.changeDenominator(denominator)
     }
 
     override fun changeSubbeat(subbeat: Int) {
-        TODO("Not yet implemented")
+        soundEngine.changeSubbeat(subbeat)
     }
 
     override fun changeAccent(accent: Boolean) {
-        TODO("Not yet implemented")
+        soundEngine.changeAccent(accent)
     }
 
     override fun changeBpm(bpm: Int) {
-        TODO("Not yet implemented")
+        soundEngine.changeBpm(bpm)
     }
 
     companion object {

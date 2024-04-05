@@ -22,6 +22,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -57,8 +58,20 @@ fun MetronomeScreen() {
                 onClickPlayStop = {
                     viewModel.playStop()
                 },
-                onClickChangeBpm = {
-                    viewModel.changeBpm(it)
+                onClickAddBpm = {
+                    viewModel.addBpm(it)
+                },
+                onClickNumerator = {
+                    viewModel.changeNumerator(it)
+                },
+                onClickDenominator = {
+                    viewModel.changeDenominator(it)
+                },
+                onClickAccent = {
+                    viewModel.changeAccent()
+                },
+                onClickSubbeat = {
+                    viewModel.changeSubbeat(it)
                 }
             )
         }
@@ -78,7 +91,11 @@ private fun LoadingScreen() {
 private fun MetronomeSkinScreen(
     screenState: ScreenState.Metronome,
     onClickPlayStop: (() -> Unit)? = null,
-    onClickChangeBpm: ((Int) -> Unit)? = null
+    onClickAddBpm: ((Int) -> Unit)? = null,
+    onClickNumerator: ((Int) -> Unit)? = null,
+    onClickDenominator: ((Int) -> Unit)? = null,
+    onClickAccent: (() -> Unit)? = null,
+    onClickSubbeat: ((Int) -> Unit)? = null,
 ) {
     Column(
         modifier = Modifier
@@ -128,7 +145,7 @@ private fun MetronomeSkinScreen(
             StateButton(
                 text = "-1",
                 containerColor = Gray80,
-                onClickListener = { onClickChangeBpm?.invoke(-1) }
+                onClickListener = { onClickAddBpm?.invoke(-1) }
             )
 
             Spacer(modifier = Modifier.size(4.dp))
@@ -136,7 +153,7 @@ private fun MetronomeSkinScreen(
             StateButton(
                 text = "-10",
                 containerColor = Gray80,
-                onClickListener = { onClickChangeBpm?.invoke(-10) }
+                onClickListener = { onClickAddBpm?.invoke(-10) }
             )
 
             Spacer(modifier = Modifier.size(4.dp))
@@ -144,7 +161,7 @@ private fun MetronomeSkinScreen(
             StateButton(
                 text = "+10",
                 containerColor = Gray80,
-                onClickListener = { onClickChangeBpm?.invoke(10) }
+                onClickListener = { onClickAddBpm?.invoke(10) }
             )
 
             Spacer(modifier = Modifier.size(4.dp))
@@ -152,7 +169,7 @@ private fun MetronomeSkinScreen(
             StateButton(
                 text = "+1",
                 containerColor = Gray80,
-                onClickListener = { onClickChangeBpm?.invoke(1) }
+                onClickListener = { onClickAddBpm?.invoke(1) }
             )
 
         }
@@ -166,31 +183,11 @@ private fun MetronomeSkinScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
 
-            val openNumeratorPickerDialog = remember { mutableStateOf(false) }
-            val numeratorValues = remember { (1..12).map { it.toString() } }
-            val numeratorIndex = remember { mutableIntStateOf(3) }
-
-            StateButton(
-                containerColor = Gray40,
-                onClickListener = { openNumeratorPickerDialog.value = true }
+            PickerButton(
+                pickerValue = screenState.numerator,
+                pickerValues = (1..12).toList()
             ) {
-                Text(
-                    text = numeratorValues[numeratorIndex.intValue],
-                    color = Color.White,
-                    fontSize = 48.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-
-            if (openNumeratorPickerDialog.value) {
-                PickerDialog(
-                    values = numeratorValues,
-                    startIndex = numeratorIndex.intValue,
-                    onDismissRequest = {
-                        openNumeratorPickerDialog.value = false
-                        numeratorIndex.intValue = it
-                    }
-                )
+                onClickNumerator?.invoke(it)
             }
 
             Spacer(modifier = Modifier.size(4.dp))
@@ -204,43 +201,24 @@ private fun MetronomeSkinScreen(
 
             Spacer(modifier = Modifier.size(4.dp))
 
-            val openDenomeratorPickerDialog = remember { mutableStateOf(false) }
-            val denomeratorValues = remember { listOf("4", "8") }
-            val denomeratorIndex = remember { mutableIntStateOf(0) }
-
-            StateButton(
-                containerColor = Gray40,
-                onClickListener = { openDenomeratorPickerDialog.value = true }
+            PickerButton(
+                pickerValue = screenState.denominator,
+                pickerValues = listOf(4, 8)
             ) {
-                Text(
-                    text = denomeratorValues[denomeratorIndex.intValue],
-                    color = Color.White,
-                    fontSize = 48.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-
-            if (openDenomeratorPickerDialog.value) {
-                PickerDialog(
-                    values = denomeratorValues,
-                    startIndex = denomeratorIndex.intValue,
-                    onDismissRequest = {
-                        openDenomeratorPickerDialog.value = false
-                        denomeratorIndex.intValue = it
-                    }
-                )
+                onClickDenominator?.invoke(it)
             }
 
             Spacer(modifier = Modifier.size(8.dp))
 
             StateButton(
-                isActive = true,
-                onClickListener = { }
+                isActive = screenState.accent,
+                onClickListener = { onClickAccent?.invoke() },
+                contentPadding = PaddingValues(0.dp)
             ) {
                 Text(
-                    text = "Accent",
+                    text = "ACCENT",
                     color = Color.White,
-                    fontSize = 18.sp,
+                    fontSize = 16.sp,
                     fontWeight = FontWeight.Bold
                 )
             }
@@ -256,33 +234,33 @@ private fun MetronomeSkinScreen(
         ) {
 
             ImageStateButton(
-                isActive = true,
+                isActive = screenState.subbeat == 0,
                 drawableResId = R.drawable.note_quarter,
-                onClickListener = { }
+                onClickListener = { onClickSubbeat?.invoke(0) }
             )
 
             Spacer(modifier = Modifier.size(4.dp))
 
             ImageStateButton(
-                isActive = false,
+                isActive = screenState.subbeat == 1,
                 drawableResId = R.drawable.note_eighth,
-                onClickListener = { }
+                onClickListener = { onClickSubbeat?.invoke(1) }
             )
 
             Spacer(modifier = Modifier.size(4.dp))
 
             ImageStateButton(
-                isActive = false,
+                isActive = screenState.subbeat == 2,
                 drawableResId = R.drawable.note_triplet,
-                onClickListener = { }
+                onClickListener = { onClickSubbeat?.invoke(2) }
             )
 
             Spacer(modifier = Modifier.size(4.dp))
 
             ImageStateButton(
-                isActive = false,
+                isActive = screenState.subbeat == 3,
                 drawableResId = R.drawable.note_sixteenth,
-                onClickListener = { }
+                onClickListener = { onClickSubbeat?.invoke(3) }
             )
 
         }
@@ -312,6 +290,46 @@ private fun MetronomeSkinScreen(
 
         Spacer(modifier = Modifier.size(32.dp))
 
+    }
+}
+
+@Composable
+private fun RowScope.PickerButton(
+    pickerValue: Int,
+    pickerValues: List<Int>,
+    onPickedValue: (Int) -> Unit
+) {
+    val openPickerDialog = remember { mutableStateOf(false) }
+    val values = remember { pickerValues.map { it.toString() } }
+    val index = remember { mutableIntStateOf(0) }
+
+    SideEffect {
+        val numeratorValue = pickerValue.toString()
+        index.intValue = values.indexOf(numeratorValue)
+    }
+
+    StateButton(
+        containerColor = Gray40,
+        onClickListener = { openPickerDialog.value = true }
+    ) {
+        Text(
+            text = pickerValue.toString(),
+            color = Color.White,
+            fontSize = 48.sp,
+            fontWeight = FontWeight.Bold
+        )
+    }
+
+    if (openPickerDialog.value) {
+        PickerDialog(
+            values = values,
+            startIndex = index.intValue,
+            onDismissRequest = {
+                openPickerDialog.value = false
+                val numeratorValue = values[it].toInt()
+                onPickedValue.invoke(numeratorValue)
+            }
+        )
     }
 }
 
