@@ -1,8 +1,10 @@
 package com.mobiray.loudmetronome.soundengine
 
-import com.mobiray.loudmetronome.soundengine.preset.Segment
-
 data class SoundEngineState(
     val isPlaying: Boolean,
-    val segment: Segment
+    val bpm: Int,
+    val numerator: Int,
+    val denominator: Int,
+    val accent: Boolean,
+    val subbeat: Int,
 )

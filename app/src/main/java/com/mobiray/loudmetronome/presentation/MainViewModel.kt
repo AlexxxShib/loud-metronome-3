@@ -59,8 +59,7 @@ class MainViewModel(private val application: Application) : AndroidViewModel(app
     }
 
     fun tryStopMetronomeService() {
-        if (!isPlaying)
-        {
+        if (!isPlaying) {
             metronomeService?.stopForegroundService()
         }
     }
@@ -69,10 +68,25 @@ class MainViewModel(private val application: Application) : AndroidViewModel(app
         metronomeService?.startStopPlayback(!isPlaying)
     }
 
+    fun changeBpm(changeValue: Int) {
+        metronomeService?.addBpm(changeValue)
+    }
+
     private fun onServiceConnected() {
         collectSoundEngineStateJob = viewModelScope.launch {
             metronomeService?.getStateFlow()?.collect {
-                _screenStateFlow.emit(ScreenState.Metronome(it.isPlaying, it.segment))
+                with(it) {
+                    _screenStateFlow.emit(
+                        ScreenState.Metronome(
+                            isPlaying = isPlaying,
+                            bpm = bpm,
+                            numerator = numerator,
+                            denominator = denominator,
+                            accent = accent,
+                            subbeat = subbeat
+                        )
+                    )
+                }
             }
         }
     }

@@ -99,7 +99,7 @@ class MetronomeService : Service(), SoundEngine {
     }
 
     override fun addBpm(addBpmValue: Int) {
-        TODO("Not yet implemented")
+        soundEngine.addBpm(addBpmValue)
     }
 
     override fun changeNumerator(numerator: Int) {

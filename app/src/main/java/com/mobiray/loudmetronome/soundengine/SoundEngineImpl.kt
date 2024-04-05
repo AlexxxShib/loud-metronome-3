@@ -32,11 +32,25 @@ class SoundEngineImpl(
     private var audioTrack: AudioTrack? = null
     private var minBufferSize = 0
 
-    var currentPreset: Preset?
-        private set
+    private var currentPreset: Preset?
+    private var isPlaying = false
 
-    var isPlaying = false
-        private set
+    private val soundEngineState: SoundEngineState
+        get() {
+            val currentSegment = currentPreset?.getSegment(0)
+                ?: throw NullPointerException("Current segment 0 is NULL")
+
+            with(currentSegment) {
+                return SoundEngineState(
+                    isPlaying = isPlaying,
+                    bpm = bpmValue,
+                    numerator = numeratorValue,
+                    denominator = denominatorValue,
+                    accent = accentValue,
+                    subbeat = subbeatValue
+                )
+            }
+        }
 
     init {
         Log.d(TAG, "SoundEngine created")
@@ -47,9 +61,7 @@ class SoundEngineImpl(
         val sample = SampleLoader.getSampleList(context)[samplePackIndex]
         setSamplePack(sample)
 
-        stateFlow = MutableStateFlow(SoundEngineState(isPlaying, preset.getSegment()))
-
-        modelChangeCallback()
+        stateFlow = MutableStateFlow(soundEngineState)
     }
 
     private fun setSamplePack(sample: Sample) {
@@ -177,18 +189,11 @@ class SoundEngineImpl(
         }
     }
 
-    private fun modelChangeCallback(segmentId: Int = 0) {
-        val currentSegment = currentPreset?.getSegment(segmentId)?.copy()
-            ?: throw NullPointerException("Current segment $segmentId is NULL")
-
-        stateFlow.value = SoundEngineState(isPlaying, currentSegment)
-    }
-
     override fun getStateFlow() = stateFlow
 
     override fun loadPreset(preset: Preset) {
         currentPreset = preset
-        modelChangeCallback()
+        stateFlow.value = soundEngineState
     }
 
     override fun startStopPlayback(isPlay: Boolean) {
@@ -198,37 +203,37 @@ class SoundEngineImpl(
         } else {
             stopPlayback()
         }
-        modelChangeCallback()
+        stateFlow.value = soundEngineState
     }
 
     override fun addBpm(addBpmValue: Int) {
         currentPreset?.getSegment()?.addBpm(addBpmValue)
-        modelChangeCallback()
+        stateFlow.value = soundEngineState
     }
 
     override fun changeNumerator(numerator: Int) {
         currentPreset?.getSegment()?.numeratorValue = numerator
-        modelChangeCallback()
+        stateFlow.value = soundEngineState
     }
 
     override fun changeDenominator(denominator: Int) {
         currentPreset?.getSegment()?.denominatorValue = denominator
-        modelChangeCallback()
+        stateFlow.value = soundEngineState
     }
 
     override fun changeSubbeat(subbeat: Int) {
         currentPreset?.getSegment()?.subbeatValue = subbeat
-        modelChangeCallback()
+        stateFlow.value = soundEngineState
     }
 
     override fun changeAccent(accent: Boolean) {
         currentPreset?.getSegment()?.accentValue = accent
-        modelChangeCallback()
+        stateFlow.value = soundEngineState
     }
 
     override fun changeBpm(bpm: Int) {
         currentPreset?.getSegment()?.bpmValue = bpm
-        modelChangeCallback()
+        stateFlow.value = soundEngineState
     }
 
     companion object {

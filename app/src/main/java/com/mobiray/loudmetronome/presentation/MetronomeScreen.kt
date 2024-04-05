@@ -37,7 +37,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.mobiray.loudmetronome.R
-import com.mobiray.loudmetronome.soundengine.preset.Segment
 import com.mobiray.loudmetronome.ui.theme.Gray40
 import com.mobiray.loudmetronome.ui.theme.Gray80
 import com.mobiray.loudmetronome.ui.theme.LoudMetronome3Theme
@@ -57,6 +56,9 @@ fun MetronomeScreen() {
                 screenState = screenStateValue,
                 onClickPlayStop = {
                     viewModel.playStop()
+                },
+                onClickChangeBpm = {
+                    viewModel.changeBpm(it)
                 }
             )
         }
@@ -75,7 +77,8 @@ private fun LoadingScreen() {
 @Composable
 private fun MetronomeSkinScreen(
     screenState: ScreenState.Metronome,
-    onClickPlayStop: (() -> Unit)?
+    onClickPlayStop: (() -> Unit)? = null,
+    onClickChangeBpm: ((Int) -> Unit)? = null
 ) {
     Column(
         modifier = Modifier
@@ -106,7 +109,7 @@ private fun MetronomeSkinScreen(
                     modifier = Modifier
                         .fillMaxWidth(),
                     textAlign = TextAlign.Center,
-                    text = "${screenState.segment.bpmValue} bpm",
+                    text = "${screenState.bpm} bpm",
                     color = Color.White,
                     fontSize = 50.sp,
                     fontWeight = FontWeight.Bold,
@@ -125,7 +128,7 @@ private fun MetronomeSkinScreen(
             StateButton(
                 text = "-1",
                 containerColor = Gray80,
-                onClickListener = { }
+                onClickListener = { onClickChangeBpm?.invoke(-1) }
             )
 
             Spacer(modifier = Modifier.size(4.dp))
@@ -133,7 +136,7 @@ private fun MetronomeSkinScreen(
             StateButton(
                 text = "-10",
                 containerColor = Gray80,
-                onClickListener = { }
+                onClickListener = { onClickChangeBpm?.invoke(-10) }
             )
 
             Spacer(modifier = Modifier.size(4.dp))
@@ -141,7 +144,7 @@ private fun MetronomeSkinScreen(
             StateButton(
                 text = "+10",
                 containerColor = Gray80,
-                onClickListener = { }
+                onClickListener = { onClickChangeBpm?.invoke(10) }
             )
 
             Spacer(modifier = Modifier.size(4.dp))
@@ -149,12 +152,12 @@ private fun MetronomeSkinScreen(
             StateButton(
                 text = "+1",
                 containerColor = Gray80,
-                onClickListener = { }
+                onClickListener = { onClickChangeBpm?.invoke(1) }
             )
 
         }
 
-        Spacer(modifier = Modifier.size(32.dp))
+        Spacer(modifier = Modifier.size(24.dp))
 
         Row(
             modifier = Modifier
@@ -244,7 +247,7 @@ private fun MetronomeSkinScreen(
 
         }
 
-        Spacer(modifier = Modifier.size(32.dp))
+        Spacer(modifier = Modifier.size(24.dp))
 
         Row(
             modifier = Modifier
@@ -284,7 +287,7 @@ private fun MetronomeSkinScreen(
 
         }
 
-        Spacer(modifier = Modifier.size(32.dp))
+        Spacer(modifier = Modifier.size(24.dp))
 
         Row(
             modifier = Modifier
@@ -374,9 +377,12 @@ fun PreviewMetronomeScreen() {
         MetronomeSkinScreen(
             screenState = ScreenState.Metronome(
                 isPlaying = true,
-                segment = Segment()
-            ),
-            null
+                bpm = 120,
+                numerator = 4,
+                denominator = 4,
+                accent = true,
+                subbeat = 0
+            )
         )
     }
 }
