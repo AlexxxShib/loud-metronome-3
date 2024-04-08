@@ -12,6 +12,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.mobiray.loudmetronome.service.MetronomeService
+import com.mobiray.loudmetronome.soundengine.TapTempoHelper
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -53,6 +54,8 @@ class MainViewModel(private val application: Application) : AndroidViewModel(app
     private val isPlaying
         get() = (_screenStateFlow.value as? ScreenState.Metronome)?.isPlaying ?: false
 
+    private val tapTempoHelper = TapTempoHelper()
+
     fun tryStartMetronomeService() {
         startForegroundService()
     }
@@ -86,6 +89,12 @@ class MainViewModel(private val application: Application) : AndroidViewModel(app
 
     fun changeSubbeat(subbeatIndex: Int) {
         metronomeService?.changeSubbeat(subbeatIndex)
+    }
+
+    fun tapTempo() {
+        tapTempoHelper.tapTempo {
+            metronomeService?.changeBpm(it)
+        }
     }
 
     private fun onServiceConnected() {

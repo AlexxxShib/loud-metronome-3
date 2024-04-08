@@ -1,5 +1,6 @@
 package com.mobiray.loudmetronome.presentation
 
+import android.view.MotionEvent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -28,8 +29,10 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -72,6 +75,9 @@ fun MetronomeScreen() {
                 },
                 onClickSubbeat = {
                     viewModel.changeSubbeat(it)
+                },
+                onTapTempo = {
+                    viewModel.tapTempo()
                 }
             )
         }
@@ -96,6 +102,7 @@ private fun MetronomeSkinScreen(
     onClickDenominator: ((Int) -> Unit)? = null,
     onClickAccent: (() -> Unit)? = null,
     onClickSubbeat: ((Int) -> Unit)? = null,
+    onTapTempo: (() -> Unit)? = null
 ) {
     Column(
         modifier = Modifier
@@ -116,7 +123,7 @@ private fun MetronomeSkinScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .border(
-                        width = 2.dp,
+                        width = 5.dp,
                         color = Color.White,
                         shape = RoundedCornerShape(32.dp)
                     ),
@@ -284,11 +291,11 @@ private fun MetronomeSkinScreen(
             StateButton(
                 text = "TAP TEMPO",
                 containerColor = Gray80,
-                onClickListener = { }
+                onTouchDown = {
+                    onTapTempo?.invoke()
+                }
             )
         }
-
-        Spacer(modifier = Modifier.size(32.dp))
 
     }
 }
@@ -353,25 +360,33 @@ private fun RowScope.ImageStateButton(
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun RowScope.StateButton(
     isActive: Boolean = false,
     text: String = "",
     containerColor: Color = Orange40,
-    onClickListener: () -> Unit,
+    onClickListener: (() -> Unit)? = null,
+    onTouchDown: (() -> Unit)? = null,
     contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
     content: @Composable (() -> Unit)? = null
 ) {
     Button(
         modifier = Modifier
             .weight(1f)
-            .fillMaxHeight(),
+            .fillMaxHeight()
+            .pointerInteropFilter {
+                if (it.action == MotionEvent.ACTION_DOWN) {
+                    onTouchDown?.invoke()
+                }
+                false
+            },
         shape = RoundedCornerShape(32.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = containerColor
         ),
         border = if (isActive) BorderStroke(5.dp, Color.White) else null,
-        onClick = { onClickListener() },
+        onClick = { onClickListener?.invoke() },
         contentPadding = contentPadding
     ) {
         if (content != null) {
