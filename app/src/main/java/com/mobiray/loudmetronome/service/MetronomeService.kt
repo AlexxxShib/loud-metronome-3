@@ -8,8 +8,8 @@ import android.os.Build
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.ServiceCompat
+import com.mobiray.loudmetronome.presentation.MetronomeApplication
 import com.mobiray.loudmetronome.soundengine.SoundEngine
-import com.mobiray.loudmetronome.soundengine.SoundEngineImpl
 import com.mobiray.loudmetronome.soundengine.SoundEngineState
 import com.mobiray.loudmetronome.soundengine.preset.Preset
 import kotlinx.coroutines.CoroutineScope
@@ -26,15 +26,19 @@ class MetronomeService : Service(), SoundEngine {
         fun getService(): MetronomeService = this@MetronomeService
     }
 
+    private val component by lazy {
+        (application as MetronomeApplication).component
+    }
+
     private val coroutineScope = CoroutineScope(Dispatchers.Default)
 
-    private lateinit var soundEngine: SoundEngine
+    private val soundEngine: SoundEngine by lazy {
+        component.getSoundEngine()
+    }
 
     override fun onCreate() {
         Log.d(TAG, "onCreate")
         super.onCreate()
-
-        soundEngine = SoundEngineImpl(this, 0)
 
         coroutineScope.launch {
             soundEngine.getStateFlow().collect {

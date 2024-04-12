@@ -1,8 +1,8 @@
 package com.mobiray.loudmetronome.presentation
 
 import android.Manifest
-import android.app.Application
 import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
@@ -13,7 +13,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mobiray.loudmetronome.service.MetronomeService
 import com.mobiray.loudmetronome.soundengine.TapTempoHelper
@@ -23,8 +23,12 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class MainViewModel(private val application: Application) : AndroidViewModel(application) {
+class MainViewModel @Inject constructor(
+    private val context: Context,
+    private val tapTempoHelper: TapTempoHelper
+) : ViewModel() {
 
     private var metronomeService: MetronomeService? = null
     private var serviceBoundState by mutableStateOf(false)
@@ -66,8 +70,6 @@ class MainViewModel(private val application: Application) : AndroidViewModel(app
             val service = metronomeService ?: return false
             return service.getStateFlow().value.isPlaying
         }
-
-    private val tapTempoHelper = TapTempoHelper()
 
     init {
         if (checkNotificationPermissionRequired()) {
@@ -111,7 +113,7 @@ class MainViewModel(private val application: Application) : AndroidViewModel(app
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
 
             val permissionStatus = ContextCompat.checkSelfPermission(
-                application, Manifest.permission.POST_NOTIFICATIONS
+                context, Manifest.permission.POST_NOTIFICATIONS
             )
 
             return permissionStatus != PackageManager.PERMISSION_GRANTED
@@ -175,21 +177,21 @@ class MainViewModel(private val application: Application) : AndroidViewModel(app
     }
 
     private fun startForegroundService() {
-        application.startForegroundService(Intent(application, MetronomeService::class.java))
+        context.startForegroundService(Intent(context, MetronomeService::class.java))
 
         tryToBindToServiceIfRunning()
     }
 
     private fun tryToBindToServiceIfRunning() {
-        Intent(application, MetronomeService::class.java).also { intent ->
-            application.bindService(intent, connection, 0)
+        Intent(context, MetronomeService::class.java).also { intent ->
+            context.bindService(intent, connection, 0)
         }
     }
 
     override fun onCleared() {
         super.onCleared()
         if (metronomeService != null) {
-            application.unbindService(connection)
+            context.unbindService(connection)
             metronomeService = null
         }
         Log.d(TAG, "onCleared")

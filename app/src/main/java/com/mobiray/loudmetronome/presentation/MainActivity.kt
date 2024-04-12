@@ -23,8 +23,15 @@ import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
+    private val component by lazy {
+        (application as MetronomeApplication).component
+    }
+
     private val mainViewModel by lazy {
-        ViewModelProvider(this)[MainViewModel::class.java]
+        ViewModelProvider(
+            owner = this,
+            factory = component.getViewModelFactory()
+        )[MainViewModel::class.java]
     }
 
     private val notificationPermissionLauncher =
