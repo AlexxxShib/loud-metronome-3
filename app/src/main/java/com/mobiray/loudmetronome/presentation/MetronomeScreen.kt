@@ -113,7 +113,7 @@ fun MetronomeSkinScreen(
 
         Row(
             modifier = Modifier
-                .height(120.dp)
+                .weight(1f)
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -144,7 +144,7 @@ fun MetronomeSkinScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(100.dp)
+                .weight(1f)
         ) {
 
             StateButton(
@@ -184,7 +184,7 @@ fun MetronomeSkinScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(100.dp),
+                .weight(1f),
             verticalAlignment = Alignment.CenterVertically
         ) {
 
@@ -234,7 +234,7 @@ fun MetronomeSkinScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(100.dp)
+                .weight(1f)
         ) {
 
             ImageStateButton(
@@ -274,7 +274,7 @@ fun MetronomeSkinScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(140.dp)
+                .weight(1.5f)
         ) {
 
             StateButton(
@@ -297,6 +297,8 @@ fun MetronomeSkinScreen(
                 }
             )
         }
+
+        Spacer(modifier = Modifier.size(24.dp))
 
     }
 }
