@@ -31,7 +31,6 @@ class MainViewModel @Inject constructor(
 ) : ViewModel() {
 
     private var metronomeService: MetronomeService? = null
-    private var serviceBoundState by mutableStateOf(false)
 
     private val connection = object : ServiceConnection {
 
@@ -40,7 +39,6 @@ class MainViewModel @Inject constructor(
 
             val binder = service as MetronomeService.LocalBinder
             metronomeService = binder.getService()
-            serviceBoundState = true
 
             onServiceConnected()
         }
@@ -48,7 +46,6 @@ class MainViewModel @Inject constructor(
         override fun onServiceDisconnected(arg0: ComponentName) {
             Log.d(TAG, "onServiceDisconnected")
 
-            serviceBoundState = false
             metronomeService = null
 
             onServiceDisconnected()
