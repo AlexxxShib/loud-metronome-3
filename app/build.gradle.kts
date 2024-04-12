@@ -8,7 +8,7 @@ android {
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.mobiray.loudmetronome"
+        applicationId = "com.mobiray.loudmetronome.test"
         minSdk = 26
         targetSdk = 34
         versionCode = 1

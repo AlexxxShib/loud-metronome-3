@@ -24,7 +24,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,12 +33,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.mobiray.loudmetronome.R
 import com.mobiray.loudmetronome.ui.theme.Gray40
 import com.mobiray.loudmetronome.ui.theme.Gray80
@@ -47,45 +46,7 @@ import com.mobiray.loudmetronome.ui.theme.LoudMetronome3Theme
 import com.mobiray.loudmetronome.ui.theme.Orange40
 
 @Composable
-fun MetronomeScreen() {
-    val viewModel: MainViewModel = viewModel()
-    val screenState = viewModel.screenStateFlow.collectAsState()
-
-    LoudMetronome3Theme {
-        when (val screenStateValue = screenState.value) {
-
-            is ScreenState.Loading -> LoadingScreen()
-
-            is ScreenState.Metronome -> MetronomeSkinScreen(
-                screenState = screenStateValue,
-                onClickPlayStop = {
-                    viewModel.playStop()
-                },
-                onClickAddBpm = {
-                    viewModel.addBpm(it)
-                },
-                onClickNumerator = {
-                    viewModel.changeNumerator(it)
-                },
-                onClickDenominator = {
-                    viewModel.changeDenominator(it)
-                },
-                onClickAccent = {
-                    viewModel.changeAccent()
-                },
-                onClickSubbeat = {
-                    viewModel.changeSubbeat(it)
-                },
-                onTapTempo = {
-                    viewModel.tapTempo()
-                }
-            )
-        }
-    }
-}
-
-@Composable
-private fun LoadingScreen() {
+fun LoadingScreen() {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -94,7 +55,44 @@ private fun LoadingScreen() {
 }
 
 @Composable
-private fun MetronomeSkinScreen(
+fun RequestPermissionScreen(
+    onClickContinue: (() -> Unit)? = null
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color = Color.Black)
+            .padding(32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = stringResource(R.string.permission_request_message),
+            color = Color.White,
+            textAlign = TextAlign.Justify
+        )
+
+        Spacer(modifier = Modifier.size(32.dp))
+
+        Button(
+            modifier = Modifier
+                .fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Orange40
+            ),
+            onClick = { onClickContinue?.invoke() }
+        ) {
+            Text(
+                text = stringResource(R.string.button_continue),
+                color = Color.White,
+                fontWeight = FontWeight.Bold
+            )
+        }
+    }
+}
+
+@Composable
+fun MetronomeSkinScreen(
     screenState: ScreenState.Metronome,
     onClickPlayStop: (() -> Unit)? = null,
     onClickAddBpm: ((Int) -> Unit)? = null,
@@ -133,7 +131,7 @@ private fun MetronomeSkinScreen(
                     modifier = Modifier
                         .fillMaxWidth(),
                     textAlign = TextAlign.Center,
-                    text = "${screenState.bpm} bpm",
+                    text = stringResource(R.string.text_field_bpm, screenState.bpm),
                     color = Color.White,
                     fontSize = 50.sp,
                     fontWeight = FontWeight.Bold,
@@ -220,10 +218,9 @@ private fun MetronomeSkinScreen(
             StateButton(
                 isActive = screenState.accent,
                 onClickListener = { onClickAccent?.invoke() },
-                contentPadding = PaddingValues(0.dp)
             ) {
                 Text(
-                    text = "ACCENT",
+                    text = stringResource(R.string.button_accent),
                     color = Color.White,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold
@@ -282,7 +279,11 @@ private fun MetronomeSkinScreen(
 
             StateButton(
                 isActive = screenState.isPlaying,
-                text = if (screenState.isPlaying) "STOP" else "PLAY",
+                text = if (screenState.isPlaying) {
+                    stringResource(R.string.button_stop)
+                } else {
+                    stringResource(R.string.button_play)
+                },
                 onClickListener = { onClickPlayStop?.invoke() }
             )
 
@@ -368,7 +369,7 @@ private fun RowScope.StateButton(
     containerColor: Color = Orange40,
     onClickListener: (() -> Unit)? = null,
     onTouchDown: (() -> Unit)? = null,
-    contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
+    contentPadding: PaddingValues = PaddingValues(0.dp),
     content: @Composable (() -> Unit)? = null
 ) {
     Button(
@@ -417,5 +418,6 @@ fun PreviewMetronomeScreen() {
                 subbeat = 0
             )
         )
+//        RequestPermissionScreen()
     }
 }

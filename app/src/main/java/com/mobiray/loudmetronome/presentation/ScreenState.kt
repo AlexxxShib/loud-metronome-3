@@ -4,6 +4,8 @@ sealed class ScreenState {
 
     data object Loading : ScreenState()
 
+    data object RequestPermission : ScreenState()
+
     data class Metronome(
         val isPlaying: Boolean,
         val bpm: Int = 120,

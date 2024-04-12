@@ -1,9 +1,17 @@
 <resources>
-    <string name="app_name">Loud Metronome 3</string>
+    <string name="app_name">Loud Metronome</string>
 
     <string name="metronome_service_notification_channel_general_name">General notification</string>
     <string name="metronome_service_notification_title">Metronome</string>
     <string name="metronome_service_notification_description">Metronome is running in the background.</string>
+
+    <string name="button_stop">STOP</string>
+    <string name="button_play">PLAY</string>
+    <string name="button_accent">ACCENT</string>
+    <string name="text_field_bpm">%1$s bpm</string>
+
+    <string name="button_continue">CONTINUE</string>
+    <string name="permission_request_message">For the application to work correctly, confirmation for sending notifications is required. This is necessary so that the application shows that it is running in the background.</string>
 
     <string-array name="samples_labels">
         <item>Loud cowbell</item>
