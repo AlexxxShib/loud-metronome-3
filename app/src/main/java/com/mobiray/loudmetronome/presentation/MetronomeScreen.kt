@@ -94,13 +94,13 @@ fun RequestPermissionScreen(
 @Composable
 fun MetronomeSkinScreen(
     screenState: ScreenState.Metronome,
-    onClickPlayStop: (() -> Unit)? = null,
-    onClickAddBpm: ((Int) -> Unit)? = null,
-    onClickNumerator: ((Int) -> Unit)? = null,
-    onClickDenominator: ((Int) -> Unit)? = null,
-    onClickAccent: (() -> Unit)? = null,
-    onClickSubbeat: ((Int) -> Unit)? = null,
-    onTapTempo: (() -> Unit)? = null
+    onClickPlayStop: (() -> Unit) = { },
+    onClickAddBpm: ((Int) -> Unit) = { },
+    onClickNumerator: ((Int) -> Unit) = { },
+    onClickDenominator: ((Int) -> Unit) = { },
+    onClickAccent: (() -> Unit) = { },
+    onClickSubbeat: ((Int) -> Unit) = { },
+    onTapTempo: (() -> Unit) = { }
 ) {
     Column(
         modifier = Modifier
@@ -150,7 +150,7 @@ fun MetronomeSkinScreen(
             StateButton(
                 text = "-1",
                 containerColor = Gray80,
-                onClickListener = { onClickAddBpm?.invoke(-1) }
+                onClickListener = { onClickAddBpm(-1) }
             )
 
             Spacer(modifier = Modifier.size(4.dp))
@@ -158,7 +158,7 @@ fun MetronomeSkinScreen(
             StateButton(
                 text = "-10",
                 containerColor = Gray80,
-                onClickListener = { onClickAddBpm?.invoke(-10) }
+                onClickListener = { onClickAddBpm(-10) }
             )
 
             Spacer(modifier = Modifier.size(4.dp))
@@ -166,7 +166,7 @@ fun MetronomeSkinScreen(
             StateButton(
                 text = "+10",
                 containerColor = Gray80,
-                onClickListener = { onClickAddBpm?.invoke(10) }
+                onClickListener = { onClickAddBpm(10) }
             )
 
             Spacer(modifier = Modifier.size(4.dp))
@@ -174,7 +174,7 @@ fun MetronomeSkinScreen(
             StateButton(
                 text = "+1",
                 containerColor = Gray80,
-                onClickListener = { onClickAddBpm?.invoke(1) }
+                onClickListener = { onClickAddBpm(1) }
             )
 
         }
@@ -192,7 +192,7 @@ fun MetronomeSkinScreen(
                 pickerValue = screenState.numerator,
                 pickerValues = (1..12).toList()
             ) {
-                onClickNumerator?.invoke(it)
+                onClickNumerator(it)
             }
 
             Spacer(modifier = Modifier.size(4.dp))
@@ -210,14 +210,14 @@ fun MetronomeSkinScreen(
                 pickerValue = screenState.denominator,
                 pickerValues = listOf(4, 8)
             ) {
-                onClickDenominator?.invoke(it)
+                onClickDenominator(it)
             }
 
             Spacer(modifier = Modifier.size(8.dp))
 
             StateButton(
                 isActive = screenState.accent,
-                onClickListener = { onClickAccent?.invoke() },
+                onClickListener = { onClickAccent() },
             ) {
                 Text(
                     text = stringResource(R.string.button_accent),
@@ -240,7 +240,7 @@ fun MetronomeSkinScreen(
             ImageStateButton(
                 isActive = screenState.subbeat == 0,
                 drawableResId = R.drawable.note_quarter,
-                onClickListener = { onClickSubbeat?.invoke(0) }
+                onClickListener = { onClickSubbeat(0) }
             )
 
             Spacer(modifier = Modifier.size(4.dp))
@@ -248,7 +248,7 @@ fun MetronomeSkinScreen(
             ImageStateButton(
                 isActive = screenState.subbeat == 1,
                 drawableResId = R.drawable.note_eighth,
-                onClickListener = { onClickSubbeat?.invoke(1) }
+                onClickListener = { onClickSubbeat(1) }
             )
 
             Spacer(modifier = Modifier.size(4.dp))
@@ -256,7 +256,7 @@ fun MetronomeSkinScreen(
             ImageStateButton(
                 isActive = screenState.subbeat == 2,
                 drawableResId = R.drawable.note_triplet,
-                onClickListener = { onClickSubbeat?.invoke(2) }
+                onClickListener = { onClickSubbeat(2) }
             )
 
             Spacer(modifier = Modifier.size(4.dp))
@@ -264,7 +264,7 @@ fun MetronomeSkinScreen(
             ImageStateButton(
                 isActive = screenState.subbeat == 3,
                 drawableResId = R.drawable.note_sixteenth,
-                onClickListener = { onClickSubbeat?.invoke(3) }
+                onClickListener = { onClickSubbeat(3) }
             )
 
         }
@@ -284,7 +284,7 @@ fun MetronomeSkinScreen(
                 } else {
                     stringResource(R.string.button_play)
                 },
-                onClickListener = { onClickPlayStop?.invoke() }
+                onClickListener = { onClickPlayStop() }
             )
 
             Spacer(modifier = Modifier.size(8.dp))
@@ -293,7 +293,7 @@ fun MetronomeSkinScreen(
                 text = "TAP TEMPO",
                 containerColor = Gray80,
                 onTouchDown = {
-                    onTapTempo?.invoke()
+                    onTapTempo()
                 }
             )
         }
