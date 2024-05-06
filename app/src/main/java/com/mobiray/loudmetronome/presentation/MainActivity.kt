@@ -18,7 +18,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.mobiray.loudmetronome.ui.theme.LoudMetronome3Theme
+import com.mobiray.loudmetronome.presentation.ui.theme.LoudMetronome3Theme
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {

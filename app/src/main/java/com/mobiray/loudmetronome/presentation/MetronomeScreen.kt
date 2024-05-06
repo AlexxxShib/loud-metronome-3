@@ -40,10 +40,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mobiray.loudmetronome.R
-import com.mobiray.loudmetronome.ui.theme.Gray40
-import com.mobiray.loudmetronome.ui.theme.Gray80
-import com.mobiray.loudmetronome.ui.theme.LoudMetronome3Theme
-import com.mobiray.loudmetronome.ui.theme.Orange40
+import com.mobiray.loudmetronome.presentation.ui.theme.Gray40
+import com.mobiray.loudmetronome.presentation.ui.theme.Gray80
+import com.mobiray.loudmetronome.presentation.ui.theme.LoudMetronome3Theme
+import com.mobiray.loudmetronome.presentation.ui.theme.Orange40
 
 @Composable
 fun LoadingScreen() {

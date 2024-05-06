@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.mobiray.loudmetronome.presentation.picker.Picker
 import com.mobiray.loudmetronome.presentation.picker.rememberPickerState
-import com.mobiray.loudmetronome.ui.theme.Gray40
+import com.mobiray.loudmetronome.presentation.ui.theme.Gray40
 
 @Composable
 fun PickerDialog(
