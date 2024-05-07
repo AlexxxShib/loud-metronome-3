@@ -1,36 +1,42 @@
 package com.mobiray.loudmetronome.presentation
 
-import android.Manifest
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
-import android.content.pm.PackageManager
-import android.os.Build
 import android.os.IBinder
 import android.util.Log
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.mobiray.loudmetronome.tools.checkNotificationPermissionRequired
 import com.mobiray.loudmetronome.service.MetronomeService
+import com.mobiray.loudmetronome.soundengine.SoundEngineState
 import com.mobiray.loudmetronome.soundengine.TapTempoHelper
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class MainViewModel @Inject constructor(
-    private val context: Context,
+    context: Context,
     private val tapTempoHelper: TapTempoHelper
 ) : ViewModel() {
 
-    private var metronomeService: MetronomeService? = null
+    private val metronomeServiceConnectionState = MutableStateFlow<MetronomeService?>(null)
+
+    private val metronomeService: MetronomeService?
+        get() = metronomeServiceConnectionState.value
+
+    private val isMetronomeServiceConnected: Boolean
+        get() = metronomeServiceConnectionState.value != null
 
     private val connection = object : ServiceConnection {
 
@@ -38,7 +44,7 @@ class MainViewModel @Inject constructor(
             Log.d(TAG, "onServiceConnected")
 
             val binder = service as MetronomeService.LocalBinder
-            metronomeService = binder.getService()
+            metronomeServiceConnectionState.value = binder.getService()
 
             onServiceConnected()
         }
@@ -46,7 +52,7 @@ class MainViewModel @Inject constructor(
         override fun onServiceDisconnected(arg0: ComponentName) {
             Log.d(TAG, "onServiceDisconnected")
 
-            metronomeService = null
+            metronomeServiceConnectionState.value = null
 
             onServiceDisconnected()
         }
@@ -58,39 +64,48 @@ class MainViewModel @Inject constructor(
     val requestNotificationPermissionFlow: Flow<Unit>
         get() = _requestNotificationPermissionFlow
 
-    private val _screenStateFlow = MutableStateFlow<ScreenState>(ScreenState.Loading)
-    val screenStateFlow: StateFlow<ScreenState>
-        get() = _screenStateFlow
+    private val screenFlow = MutableSharedFlow<ScreenState>(1)
+
+    val screenStateFlow: StateFlow<ScreenState> = merge(
+        metronomeServiceConnectionState
+            .filter { it == null }
+            .map { ScreenState.Loading },
+        screenFlow
+    ).stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.Lazily,
+        initialValue = ScreenState.Loading
+    )
 
     private val isPlaying: Boolean
-        get() {
-            val service = metronomeService ?: return false
-            return service.getStateFlow().value.isPlaying
-        }
+        get() = metronomeService?.getStateFlow()?.value?.isPlaying ?: false
+
+    private val isAccent: Boolean
+        get() = metronomeService?.getStateFlow()?.value?.accent ?: false
 
     init {
-        if (checkNotificationPermissionRequired()) {
+        if (checkNotificationPermissionRequired(context)) {
             viewModelScope.launch {
-                _screenStateFlow.emit(ScreenState.RequestPermission)
+                screenFlow.emit(ScreenState.RequestPermission)
             }
         }
     }
 
-    fun tryStartMetronomeService() {
-        if (checkNotificationPermissionRequired()) {
+    fun tryStartMetronome(context: Context) {
+        if (checkNotificationPermissionRequired(context)) {
             return
         }
 
-        viewModelScope.launch {
-            if (metronomeService == null)
-            {
-                _screenStateFlow.emit(ScreenState.Loading)
-                startForegroundService()
+        if (!isMetronomeServiceConnected) {
+            context.startForegroundService(Intent(context, MetronomeService::class.java))
+
+            Intent(context, MetronomeService::class.java).also { intent ->
+                context.bindService(intent, connection, 0)
             }
         }
     }
 
-    fun tryStopMetronomeService() {
+    fun tryStopMetronome() {
         if (!isPlaying) {
             metronomeService?.stopForegroundService()
         }
@@ -100,23 +115,6 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch {
             _requestNotificationPermissionFlow.emit(Unit)
         }
-    }
-
-    fun handlePermissionRequest() {
-        tryStartMetronomeService()
-    }
-
-    private fun checkNotificationPermissionRequired(): Boolean {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-
-            val permissionStatus = ContextCompat.checkSelfPermission(
-                context, Manifest.permission.POST_NOTIFICATIONS
-            )
-
-            return permissionStatus != PackageManager.PERMISSION_GRANTED
-        }
-
-        return false
     }
 
     fun playStop() {
@@ -136,8 +134,7 @@ class MainViewModel @Inject constructor(
     }
 
     fun changeAccent() {
-        val currentAccent = (_screenStateFlow.value as? ScreenState.Metronome)?.accent ?: false
-        metronomeService?.changeAccent(!currentAccent)
+        metronomeService?.changeAccent(!isAccent)
     }
 
     fun changeSubbeat(subbeatIndex: Int) {
@@ -153,18 +150,7 @@ class MainViewModel @Inject constructor(
     private fun onServiceConnected() {
         collectSoundEngineStateJob = viewModelScope.launch {
             metronomeService?.getStateFlow()?.collect {
-                with(it) {
-                    _screenStateFlow.emit(
-                        ScreenState.Metronome(
-                            isPlaying = isPlaying,
-                            bpm = bpm,
-                            numerator = numerator,
-                            denominator = denominator,
-                            accent = accent,
-                            subbeat = subbeat
-                        )
-                    )
-                }
+                screenFlow.emit(it.toMetronomeScreenState())
             }
         }
     }
@@ -173,29 +159,17 @@ class MainViewModel @Inject constructor(
         collectSoundEngineStateJob?.cancel()
     }
 
-    private fun startForegroundService() {
-        context.startForegroundService(Intent(context, MetronomeService::class.java))
-
-        tryToBindToServiceIfRunning()
-    }
-
-    private fun tryToBindToServiceIfRunning() {
-        Intent(context, MetronomeService::class.java).also { intent ->
-            context.bindService(intent, connection, 0)
-        }
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        if (metronomeService != null) {
-            context.unbindService(connection)
-            metronomeService = null
-        }
-        Log.d(TAG, "onCleared")
-    }
-
     companion object {
 
         private const val TAG = "MainViewModel_TAG"
     }
+
+    private fun SoundEngineState.toMetronomeScreenState() = ScreenState.Metronome(
+        isPlaying = isPlaying,
+        bpm = bpm,
+        numerator = numerator,
+        denominator = denominator,
+        accent = accent,
+        subbeat = subbeat
+    )
 }

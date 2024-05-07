@@ -10,6 +10,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
@@ -18,6 +19,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.mobiray.loudmetronome.MetronomeApplication
 import com.mobiray.loudmetronome.presentation.ui.theme.LoudMetronome3Theme
 import kotlinx.coroutines.launch
 
@@ -37,7 +39,7 @@ class MainActivity : ComponentActivity() {
     private val notificationPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { success ->
             if (success) {
-                mainViewModel.handlePermissionRequest()
+                mainViewModel.tryStartMetronome(this)
             } else {
                 openAppSettings()
             }
@@ -50,6 +52,7 @@ class MainActivity : ComponentActivity() {
             val screenState = mainViewModel.screenStateFlow.collectAsState()
 
             LoudMetronome3Theme {
+                Log.d(TAG, "recomposition ${screenState.value}")
                 when (val screenStateValue = screenState.value) {
 
                     is ScreenState.Loading -> LoadingScreen()
@@ -94,7 +97,7 @@ class MainActivity : ComponentActivity() {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                         notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                     } else {
-                        mainViewModel.handlePermissionRequest()
+                        mainViewModel.tryStartMetronome(this@MainActivity)
                     }
                 }
             }
@@ -104,13 +107,13 @@ class MainActivity : ComponentActivity() {
     override fun onStart() {
         super.onStart()
 
-        mainViewModel.tryStartMetronomeService()
+        mainViewModel.tryStartMetronome(this)
     }
 
     override fun onStop() {
         super.onStop()
 
-        mainViewModel.tryStopMetronomeService()
+        mainViewModel.tryStopMetronome()
     }
 
     private fun openAppSettings() {

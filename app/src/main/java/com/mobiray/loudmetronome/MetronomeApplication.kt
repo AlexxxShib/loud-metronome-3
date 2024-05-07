@@ -1,4 +1,4 @@
-package com.mobiray.loudmetronome.presentation
+package com.mobiray.loudmetronome
 
 import android.app.Application
 import com.mobiray.loudmetronome.di.ApplicationComponent

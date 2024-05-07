@@ -8,7 +8,9 @@ import android.os.Build
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.ServiceCompat
-import com.mobiray.loudmetronome.presentation.MetronomeApplication
+import com.mobiray.loudmetronome.MetronomeApplication
+import com.mobiray.loudmetronome.tools.buildNotification
+import com.mobiray.loudmetronome.tools.createNotificationChannel
 import com.mobiray.loudmetronome.soundengine.SoundEngine
 import com.mobiray.loudmetronome.soundengine.SoundEngineState
 import com.mobiray.loudmetronome.soundengine.preset.Preset
@@ -70,7 +72,7 @@ class MetronomeService : Service(), SoundEngine {
     }
 
     private fun startAsForegroundService() {
-        NotificationsHelper.createNotificationChannel(this)
+        createNotificationChannel(this)
 
         val foregroundServiceType = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
@@ -81,7 +83,7 @@ class MetronomeService : Service(), SoundEngine {
         ServiceCompat.startForeground(
             this,
             SERVICE_ID,
-            NotificationsHelper.buildNotification(this),
+            buildNotification(this),
             foregroundServiceType
         )
     }
