@@ -25,14 +25,14 @@ import com.mobiray.loudmetronome.presentation.ui.theme.Gray40
 fun PickerDialog(
     values: List<String>,
     startIndex: Int,
-    onDismissRequest: (Int) -> Unit
+    onValueSelected: (Int) -> Unit
 ) {
     val valuesPickerState = rememberPickerState()
 
     Dialog(
         onDismissRequest = {
             val index = values.indexOf(valuesPickerState.selectedItem)
-            onDismissRequest(index)
+            onValueSelected(index)
         }
     ) {
         Card(
@@ -53,7 +53,8 @@ fun PickerDialog(
                     color = Color.White,
                     fontSize = 32.sp
                 ),
-                dividerColor = Color.White
+                dividerColor = Color.White,
+                onValueSelected = onValueSelected
             )
         }
     }
@@ -66,7 +67,7 @@ fun PickerDialogPreview() {
         PickerDialog(
             values = remember { (1..11).map { it.toString() } },
             startIndex = 3,
-            onDismissRequest = {}
+            onValueSelected = {}
         )
     }
 }

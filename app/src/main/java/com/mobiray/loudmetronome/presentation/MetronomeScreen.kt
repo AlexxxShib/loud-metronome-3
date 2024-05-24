@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -334,9 +333,9 @@ private fun RowScope.PickerButton(
         PickerDialog(
             values = values,
             startIndex = index.intValue,
-            onDismissRequest = {
+            onValueSelected = { valueIndex ->
                 openPickerDialog.value = false
-                val numeratorValue = values[it].toInt()
+                val numeratorValue = values[valueIndex].toInt()
                 onPickedValue.invoke(numeratorValue)
             }
         )

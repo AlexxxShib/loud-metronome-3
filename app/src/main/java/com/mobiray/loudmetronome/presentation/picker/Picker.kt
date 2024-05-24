@@ -1,8 +1,11 @@
 package com.mobiray.loudmetronome.presentation.picker
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -35,14 +38,15 @@ import kotlinx.coroutines.flow.map
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun Picker(
+    modifier: Modifier = Modifier,
     items: List<String>,
     state: PickerState = rememberPickerState(),
-    modifier: Modifier = Modifier,
     startIndex: Int = 0,
     visibleItemsCount: Int = 3,
     textModifier: Modifier = Modifier,
     textStyle: TextStyle = LocalTextStyle.current,
     dividerColor: Color = LocalContentColor.current,
+    onValueSelected: (Int) -> Unit = { }
 ) {
 
     val visibleItemsMiddle = visibleItemsCount / 2
@@ -86,15 +90,24 @@ fun Picker(
                 .fadingEdge(fadingEdgeGradient)
         ) {
             items(listScrollCount) { index ->
-                Text(
-                    text = getItem(index),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    style = textStyle,
-                    modifier = Modifier
-                        .onSizeChanged { size -> itemHeightPixels.value = size.height }
-                        .then(textModifier)
-                )
+                Box(modifier = Modifier
+                    .fillMaxSize()
+                    .clickable {
+                        val itemIndex = index % items.size
+                        onValueSelected(itemIndex)
+                    },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = getItem(index),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        style = textStyle,
+                        modifier = Modifier
+                            .onSizeChanged { size -> itemHeightPixels.value = size.height }
+                            .then(textModifier)
+                    )
+                }
             }
         }
 
